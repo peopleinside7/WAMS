@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WAMS 도입 현황 및 운영 방안 보고서</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#122548;
+  --navy-2:#1c3a6e;
+  --sky:#2f6fed;
+  --sky-light:#eaf1ff;
+  --gold:#b8860b;
+  --gold-light:#fdf3dc;
+  --ink:#182333;
+  --muted:#5b6b82;
+  --line:#e3e8f0;
+  --bg:#f4f6fa;
+  --ok:#1a7f4b;
+  --ok-light:#e6f6ee;
+  --warn:#a15c00;
+  --warn-light:#fff3df;
+  --danger:#b3261e;
+  --danger-light:#fdeceb;
+  --shadow:0 6px 20px -8px rgba(18,37,72,0.18);
+  --shadow-lg:0 18px 40px -12px rgba(18,37,72,0.25);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Noto Sans KR',-apple-system,sans-serif;
+  color:var(--ink);
+  background:var(--bg);
+  line-height:1.75;
+  font-size:15.5px;
+}
+::selection{background:var(--sky-light);}
+
+/* ===== Cover / Header ===== */
+.cover{
+  background:
+    radial-gradient(circle at 88% 92%, rgba(216,232,180,0.55), transparent 45%),
+    linear-gradient(135deg,#dcecfb 0%, #cfe4f8 45%, #e9f2fc 100%);
+  color:var(--navy);
+  padding:4rem 2rem 3rem;
+  position:relative;
+  overflow:hidden;
+}
+.cover::after{
+  content:'';
+  position:absolute; right:-6%; bottom:-18%;
+  width:340px; height:340px; border-radius:50%;
+  background:radial-gradient(circle, rgba(224,214,140,0.55) 0%, rgba(224,214,140,0.0) 70%);
+  pointer-events:none;
+}
+.cover-inner{max-width:980px;margin:0 auto;position:relative;z-index:1;}
+.cover-eyebrow{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.82rem; font-weight:700; letter-spacing:.01em;
+  color:var(--navy-2);
+  background:#fff;
+  border:1px solid rgba(28,58,110,0.12);
+  padding:.4rem .9rem; border-radius:999px;
+  margin-bottom:1.6rem;
+  box-shadow:0 4px 12px -6px rgba(18,37,72,0.18);
+}
+.cover-eyebrow::before{content:''; width:7px; height:7px; border-radius:50%; background:var(--sky); display:inline-block;}
+.cover h1{
+  font-size:2.5rem; font-weight:900; letter-spacing:-.01em;
+  line-height:1.28; margin-bottom:.9rem; color:var(--navy);
+}
+.cover h1 small{
+  display:block; font-size:1.05rem; font-weight:500; color:#3b5788;
+  margin-top:.6rem; letter-spacing:0;
+}
+.cover-meta{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:0; margin-top:2rem;
+  border-top:1px solid rgba(28,58,110,0.15);
+  padding-top:1.3rem;
+}
+.cover-meta div{padding:0 1.2rem 0 0; border-left:2px solid rgba(28,58,110,0.18); padding-left:1rem;}
+.cover-meta div:first-child{border-left:none; padding-left:0;}
+.cover-meta .label{font-size:.72rem; color:#5b6b82; letter-spacing:.08em; margin-bottom:.3rem;}
+.cover-meta .value{font-size:.95rem; font-weight:700; color:var(--navy);}
+
+.cover-stats{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:.9rem; margin-top:1.8rem;
+}
+.cover-stat{
+  background:#fff; border-radius:14px; padding:1.1rem 1.2rem;
+  box-shadow:0 8px 20px -12px rgba(18,37,72,0.25);
+}
+.cover-stat .num{font-size:1.7rem; font-weight:900; color:var(--sky);}
+.cover-stat .lbl{font-size:.8rem; color:var(--muted); margin-top:.2rem;}
+
+/* ===== Nav ===== */
+.nav{
+  background:#fff; border-bottom:1px solid var(--line);
+  position:sticky; top:0; z-index:200; box-shadow:var(--shadow);
+}
+.nav-inner{max-width:1080px;margin:0 auto;padding:0 1.5rem;overflow-x:auto;}
+.nav ul{display:flex; list-style:none; gap:.15rem; padding:.6rem 0;}
+.nav a{
+  display:block; padding:.45rem .8rem; color:var(--muted);
+  text-decoration:none; font-size:.82rem; font-weight:600;
+  border-radius:7px; white-space:nowrap; transition:.15s;
+}
+.nav a:hover{background:var(--sky-light); color:var(--sky);}
+.nav a.active{background:var(--navy); color:#fff;}
+
+/* ===== Layout ===== */
+.wrap{max-width:1080px; margin:0 auto; padding:2.4rem 1.5rem 5rem;}
+.panel{
+  background:#fff; border-radius:16px; box-shadow:var(--shadow);
+  padding:2.6rem 2.8rem; margin-bottom:1.6rem;
+}
+section{margin-bottom:0;}
+section + section{margin-top:0;}
+
+.sec-head{display:flex; align-items:baseline; gap:.9rem; margin-bottom:1.4rem; padding-bottom:.9rem; border-bottom:3px solid var(--navy);}
+.sec-num{
+  font-family:'JetBrains Mono',monospace; font-weight:700; font-size:1rem;
+  background:var(--navy); color:#fff; border-radius:8px; padding:.25rem .65rem;
+  flex-shrink:0;
+}
+.sec-head h2{font-size:1.5rem; font-weight:800; color:var(--navy);}
+h3{font-size:1.14rem; font-weight:700; color:var(--navy-2); margin:1.8rem 0 .8rem; padding-left:.75rem; border-left:4px solid var(--sky-light);}
+h3 .num{color:var(--sky); font-family:'JetBrains Mono',monospace; margin-right:.4rem;}
+h4{font-size:1rem; font-weight:700; color:var(--ink); margin:1.2rem 0 .5rem;}
+p{color:#3b4657; margin-bottom:.85rem;}
+ul,ol{margin:.6rem 0 1rem 1.35rem; color:#3b4657;}
+li{margin:.4rem 0;}
+strong{color:var(--navy-2); font-weight:700;}
+.muted{color:var(--muted); font-size:.9rem;}
+
+/* ===== Callouts ===== */
+.box{border-radius:12px; padding:1.2rem 1.4rem; margin:1.2rem 0; border-left:4px solid;}
+.box.info{background:var(--sky-light); border-color:var(--sky);}
+.box.warn{background:var(--warn-light); border-color:var(--warn);}
+.box.ok{background:var(--ok-light); border-color:var(--ok);}
+.box.gold{background:var(--gold-light); border-color:var(--gold);}
+.box.danger{background:var(--danger-light); border-color:var(--danger);}
+.box p:last-child{margin-bottom:0;}
+.box-title{font-weight:800; margin-bottom:.4rem; display:flex; align-items:center; gap:.4rem; color:var(--navy);}
+
+.quote-card{
+  background:linear-gradient(135deg,var(--navy) 0%, var(--navy-2) 100%);
+  color:#fff; border-radius:14px; padding:1.8rem 2rem; margin:1.3rem 0;
+  position:relative;
+}
+.quote-card::before{content:'“'; font-size:3.2rem; font-family:Georgia,serif; color:rgba(255,255,255,0.25); position:absolute; top:.2rem; left:1rem; line-height:1;}
+.quote-card p{color:#eef4ff; font-size:1.05rem; font-weight:600; padding-left:1.6rem; margin-bottom:.4rem;}
+.quote-card .attr{color:#a9c4f5; font-size:.82rem; padding-left:1.6rem;}
+
+/* ===== Tables ===== */
+.table-wrap{overflow-x:auto; margin:1.2rem 0; border-radius:12px; border:1px solid var(--line);}
+table{width:100%; border-collapse:collapse; font-size:.92rem;}
+th{background:var(--navy); color:#fff; font-weight:700; padding:.75rem .9rem; text-align:left; white-space:nowrap;}
+td{padding:.72rem .9rem; border-bottom:1px solid var(--line); vertical-align:top;}
+tr:nth-child(even) td{background:#f8fafc;}
+tr:hover td{background:var(--sky-light);}
+td strong{color:var(--ink);}
+
+/* ===== Badges ===== */
+.badge{display:inline-block; padding:.18rem .62rem; border-radius:999px; font-size:.72rem; font-weight:700;}
+.b-ok{background:var(--ok-light); color:var(--ok);}
+.b-warn{background:var(--warn-light); color:var(--warn);}
+.b-danger{background:var(--danger-light); color:var(--danger);}
+.b-info{background:var(--sky-light); color:var(--sky);}
+.b-gold{background:var(--gold-light); color:var(--gold);}
+
+/* ===== Cards ===== */
+.card-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.1rem; margin:1.2rem 0;}
+.card{border:1px solid var(--line); border-radius:12px; padding:1.2rem 1.3rem; background:#fbfcfe;}
+.card .k{font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--sky); letter-spacing:.06em; margin-bottom:.4rem;}
+.card .t{font-weight:800; color:var(--navy); margin-bottom:.4rem;}
+.card .d{font-size:.86rem; color:var(--muted);}
+
+/* ===== Stepper ===== */
+.stepper{display:flex; flex-wrap:wrap; gap:.6rem; margin:1.3rem 0;}
+.step{
+  flex:1 1 190px; background:#fff; border:1px solid var(--line); border-radius:12px;
+  padding:1rem 1.1rem; position:relative;
+}
+.step .no{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:26px; height:26px; border-radius:50%; background:var(--navy); color:#fff;
+  font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.8rem; margin-bottom:.5rem;
+}
+.step.current .no{background:var(--sky);}
+.step .t{font-weight:700; color:var(--navy); font-size:.92rem; margin-bottom:.3rem;}
+.step .d{font-size:.8rem; color:var(--muted);}
+.step-arrow{align-self:center; color:var(--muted); font-size:1.2rem; display:flex; align-items:center;}
+
+/* ===== Process step (circle) visualization ===== */
+.process{background:#f8fafc; border:1px solid var(--line); border-radius:14px; padding:1.8rem 1.6rem; margin:1.2rem 0;}
+.process-title{
+  text-align:center; font-weight:800; color:#fff; font-size:1rem;
+  background:linear-gradient(120deg,var(--navy-2),var(--sky));
+  border-radius:10px; padding:.7rem 1rem; margin-bottom:1.8rem;
+}
+.process-track{display:flex; align-items:flex-start; justify-content:space-between; gap:.4rem; flex-wrap:wrap;}
+.proc-step{flex:1 1 140px; display:flex; flex-direction:column; align-items:center; text-align:center; min-width:130px;}
+.proc-circle{
+  width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-weight:800; font-size:1.35rem;
+  background:#fff; border:3px solid var(--sky); color:var(--sky); margin-bottom:.7rem;
+}
+.proc-circle.next{border-color:var(--ok); color:var(--ok);}
+.proc-t{font-weight:700; color:var(--navy); font-size:.92rem; margin-bottom:.25rem;}
+.proc-d{font-size:.78rem; color:var(--muted); margin-bottom:.55rem; line-height:1.4;}
+.proc-line{flex:0 0 34px; height:3px; margin-top:30px; background:repeating-linear-gradient(90deg,var(--sky) 0 6px, transparent 6px 11px); align-self:flex-start;}
+.process-status{
+  margin-top:1.6rem; background:var(--navy); color:#eaf1ff; border-radius:12px;
+  padding:1rem 1.3rem; font-size:.92rem; line-height:1.7;
+}
+.process-status strong{color:#fff;}
+@media (max-width:820px){
+  .proc-line{display:none;}
+  .process-track{justify-content:flex-start;}
+}
+
+/* ===== Mermaid ===== */
+.mermaid{background:#fff; border:1px solid var(--line); border-radius:12px; padding:1.6rem 1rem; margin:1.3rem 0; text-align:center; box-shadow:var(--shadow);}
+
+/* ===== RACI / responsibility pill ===== */
+.who{display:inline-flex; align-items:center; gap:.35rem; font-size:.82rem; font-weight:700; color:var(--navy-2); background:var(--sky-light); border-radius:8px; padding:.25rem .6rem; margin:.15rem .25rem .15rem 0;}
+
+/* ===== TOC list numbering ===== */
+.toc-grid{display:grid; grid-template-columns:1fr 1fr; gap:.5rem 2rem; margin-top:1rem;}
+.toc-grid a{color:var(--navy-2); text-decoration:none; font-weight:600; font-size:.92rem; display:flex; gap:.5rem;}
+.toc-grid a span{color:var(--sky); font-family:'JetBrains Mono',monospace; font-weight:700;}
+.toc-grid a:hover{text-decoration:underline;}
+
+/* ===== print ===== */
+@media print{
+  .nav{display:none;}
+  .panel{box-shadow:none; border:1px solid #ccc;}
+  .cover{background:var(--navy) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+}
+@media (max-width:720px){
+  .panel{padding:1.6rem 1.3rem;}
+  .cover h1{font-size:1.7rem;}
+  .toc-grid{grid-template-columns:1fr;}
+}
+footer{max-width:1080px;margin:0 auto;padding:0 1.5rem 3rem;color:var(--muted);font-size:.82rem;text-align:center;}
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="cover-inner">
+    <span class="cover-eyebrow">WAMS 운영방안 · 결재요청</span>
+    <h1>WAMS 도입 현황 및 운영 방안 보고
+      <small>업무자산관리시스템(Work Asset Management System) 전사 확산을 위한 종합 실행안</small>
+    </h1>
+    <div class="cover-meta">
+      <div><div class="label">보고일</div><div class="value">2026. 07. 06.</div></div>
+      <div><div class="label">보고대상</div><div class="value">한정훈 대표이사 및 경영진</div></div>
+      <div><div class="label">작성</div><div class="value">피플팀 홍광준 팀장 (서비스기획)</div></div>
+      <div><div class="label">공동작성</div><div class="value">전략개발팀 김대환 팀장 (시스템개발)</div></div>
+    </div>
+    <div class="cover-stats">
+      <div class="cover-stat"><div class="num">3개월</div><div class="lbl">시범운영 기간</div></div>
+      <div class="cover-stat"><div class="num">3-Track</div><div class="lbl">프로젝트 관리체계</div></div>
+      <div class="cover-stat"><div class="num">12개</div><div class="lbl">운영 방안 과제</div></div>
+      <div class="cover-stat"><div class="num">4건</div><div class="lbl">경영진 결재 요청</div></div>
+    </div>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <ul id="navList">
+      <li><a href="#s0">개요</a></li>
+      <li><a href="#s1">추진 경과</a></li>
+      <li><a href="#s2">현안 진단</a></li>
+      <li><a href="#s3">운영 방안</a></li>
+      <li><a href="#s4">전사 구조도</a></li>
+      <li><a href="#s5">향후 일정</a></li>
+      <li><a href="#s6">기대효과</a></li>
+      <li><a href="#s7">결재 요청</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ============ 0. 개요 ============ -->
+<section id="s0" class="panel">
+  <div class="sec-head"><span class="sec-num">00</span><h2>보고 개요</h2></div>
+
+  <p>본 보고서는 <strong>WAMS(업무자산관리시스템)</strong>의 개발 완료 후 3개월간 시범운영 결과와, 2026년 6월 26일 및 6월 29일 진행된 개선회의(피플팀 홍광준 팀장, 전략개발팀 김대환 팀장)에서 도출된 현장 의견을 종합하여, <strong>전사 정식 런칭을 위한 구체적 운영 방안</strong>을 제시하기 위해 작성되었습니다.</p>
+
+  <p>WAMS는 파편화되어 있던 채용·재무·연구개발·영업·총무 등 전 부서의 업무 데이터를 하나의 플랫폼으로 통합하여, <strong>담당자 변경이나 퇴사가 발생해도 별도의 인수인계 절차 없이 업무가 연속되는 조직</strong>을 만드는 것을 목적으로 합니다. 다만 시범운영 과정에서 <strong>일일 업무이력 입력(데일리체크인)에 대한 현업의 피로도</strong>가 확인되었으며, 이를 최소화하면서도 시스템 도입의 본래 목적을 달성할 수 있는 균형점을 마련하는 것이 이번 보고의 핵심입니다.</p>
+
+  <div class="box info">
+    <div class="box-title">📌 한눈에 보는 핵심 요약</div>
+    <ul style="margin-bottom:0;">
+      <li><strong>현황</strong> — 1차 개발 완료(2026.2월 목표) 후 3개월 시범운영 진행, 기능 개선 다수 반영</li>
+      <li><strong>핵심 이슈</strong> — 매일 접속하여 업무이력을 남겨야 하는 데일리체크인에 대한 현업 피로도, "왜 나스/컨플루언스가 아닌 WAMS인가"라는 반복적 문제제기</li>
+      <li><strong>방향</strong> — 기능은 <strong>데일리체크인·업무현황·프로젝트 진척도</strong> 3대 핵심으로 슬림화하고, <strong>주간·월간 업무보고 자동 생성 기능</strong>을 얹어 현업의 이중 작업을 제거</li>
+      <li><strong>요청</strong> — 프로젝트 관리단위 재설계, 계정 일원화, 데일리체크인 승인 정책 등 4개 사항에 대한 경영진 결재</li>
+    </ul>
+  </div>
+
+  <h3><span class="num">0.1</span>추진 조직</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>구분</th><th>담당</th><th>역할</th></tr></thead>
+      <tbody>
+        <tr><td><strong>총괄</strong></td><td>한정훈 대표이사</td><td>전사 도입 의사결정 및 최종 승인</td></tr>
+        <tr><td><strong>서비스 기획</strong></td><td>피플팀 홍광준 팀장</td><td>업무 프로세스 설계, 현업 커뮤니케이션, 설문·개선회의 운영</td></tr>
+        <tr><td><strong>시스템 개발</strong></td><td>전략개발팀 김대환 팀장</td><td>WAMS 시스템 개발·개선, 인프라 및 연동 구조 설계</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 1. 추진 경과 ============ -->
+<section id="s1" class="panel">
+  <div class="sec-head"><span class="sec-num">01</span><h2>추진 경과</h2></div>
+
+  <div class="process">
+    <div class="process-title">'WAMS 도입' 추진 절차</div>
+    <div class="process-track">
+      <div class="proc-step">
+        <div class="proc-circle done">1</div>
+        <div class="proc-t">서비스 기획 확정</div>
+        <div class="proc-d">설계서 v1.7 · 1차 개발범위 확정</div>
+        <span class="badge b-ok">완료</span>
+      </div>
+      <div class="proc-line"></div>
+      <div class="proc-step">
+        <div class="proc-circle done">2</div>
+        <div class="proc-t">1차 시스템 개발</div>
+        <div class="proc-d">인증·프로젝트·업무·피드백 API (6주)</div>
+        <span class="badge b-ok">완료</span>
+      </div>
+      <div class="proc-line"></div>
+      <div class="proc-step">
+        <div class="proc-circle done">3</div>
+        <div class="proc-t">3개월 시범운영</div>
+        <div class="proc-d">기능 개선 반영 · 현업 피로도 확인</div>
+        <span class="badge b-ok">완료</span>
+      </div>
+      <div class="proc-line"></div>
+      <div class="proc-step">
+        <div class="proc-circle done">4</div>
+        <div class="proc-t">개선회의 · 경영진 보고</div>
+        <div class="proc-d">운영 방안 협의 및 결재 요청(본 문서)</div>
+        <span class="badge b-ok">완료</span>
+      </div>
+      <div class="proc-line"></div>
+      <div class="proc-step">
+        <div class="proc-circle next">5</div>
+        <div class="proc-t">전사 정식 오픈</div>
+        <div class="proc-d">주간·월간 자동보고 탑재 후 오픈</div>
+        <span class="badge b-warn">예정</span>
+      </div>
+    </div>
+    <div class="process-status">
+      현재 진행상황 — 서비스 기획, 1차 시스템 개발, 3개월 시범운영, 개선회의 및 경영진 보고까지 완료되었으며, 다음 단계로 <strong>주간·월간 자동보고 기능 탑재 및 전사 정식 오픈</strong>을 실시할 예정입니다.
+    </div>
+  </div>
+
+  <h3><span class="num">1.1</span>시범운영 개요</h3>
+  <p>2026년 2월 말 1차 개발 완료 후, 담당자 변경 시 업무 연속성 확보와 부서별 투입 인력 파악을 목표로 NVT·프로젝트·업무·업무코드·피드백·산출물·투입시간 관리 기능을 중심으로 3개월간 시범운영을 진행했습니다. 그 결과 시스템 자체의 완성도보다 <strong>"매일 입력해야 하는 습관을 어떻게 조직에 정착시킬 것인가"</strong>가 성패를 좌우하는 핵심 과제로 확인되었습니다.</p>
+
+  <h3><span class="num">1.2</span>제외 범위 대비 현재 위치</h3>
+  <p>1차 개발 범위에서는 그룹웨어 연계, ERP(NVT) 연계, Jira/Confluence 직접 연동, LLM 기반 주간업무요약을 2차 과제로 분류한 바 있습니다. 본 보고서의 운영 방안은 이 중 <strong>주간·월간 업무보고 자동화</strong>를 조기 반영 항목으로 격상하여 정식 오픈과 함께 제공하는 것을 제안합니다.</p>
+</section>
+
+<!-- ============ 2. 현안 진단 ============ -->
+<section id="s2" class="panel">
+  <div class="sec-head"><span class="sec-num">02</span><h2>현안 진단 — 왜 저항이 발생하는가</h2></div>
+
+  <p>개선회의와 현업 설문을 통해 확인된 문제는 기능 결함이 아니라 <strong>"필요성에 대한 공감대 부족"</strong>과 <strong>"기존 습관과의 충돌"</strong>에서 비롯됩니다. 최근 확산된 AI 업무도구, 간편한 협업툴(컨플루언스, 지라 등) 대비 WAMS가 왜 별도로 필요한지에 대한 설명이 충분하지 않았던 점이 핵심 원인입니다.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>이슈</th><th>현상</th><th>영향</th></tr></thead>
+      <tbody>
+        <tr><td><strong>①  일일 입력 피로</strong></td><td>업무일지 개념으로 매일 접속해 이력을 남겨야 함</td><td>강제화된 필수 프로그램에 대한 거부감, 형식적 입력 우려</td></tr>
+        <tr><td><strong>②  존재 이유 불명확</strong></td><td>"나스(NAS)로 충분하다", "컨플루언스·지라와 뭐가 다른가"라는 질문 반복</td><td>도입 당위성에 대한 지속적 의구심, 참여 동기 저하</td></tr>
+        <tr><td><strong>③  프로젝트 관리단위 혼선</strong></td><td>ERP 프로젝트는 NVT(부서 Level), 세부프로젝트는 경비 지출용으로만 존재</td><td>WAMS 프로젝트 단위 기준이 불명확 → 등록 시 혼란</td></tr>
+        <tr><td><strong>④  계정 중복</strong></td><td>겸직 발령자, 그룹사 중복 가입자 등 여러 ID 혼재</td><td>이력 분산, 인수인계·집계 오류 가능성</td></tr>
+        <tr><td><strong>⑤  투입시간(M/M) 입력 부담 우려</strong></td><td>타임테이블식 시간기록 방식으로 오인</td><td>입력 방식에 대한 사전 거부감</td></tr>
+        <tr><td><strong>⑥  회계 연계 불명확</strong></td><td>IFRS18 등 손익 반영 구조와 WAMS 투입시간의 관계 불명확</td><td>경영관리그룹(10층)의 필요성 체감도 낮음</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3><span class="num">2.1</span>근본 원인 — 데이터 맥락(Context)의 소실</h3>
+  <p>2026년 6월 29일 김대환 팀장 미팅에서 재정립된 핵심 메시지는, WAMS가 단순한 저장소가 아니라 <strong>업무 흐름과 의사결정 근거를 하나의 맥락 안에서 관리하는 '중심 참고점(Central Reference)'</strong>이라는 점입니다. 구두 보고로 끝나는 거래처 회의, 최종본만 남고 사라지는 개발 버전별 피드백, 탈락한 제안서의 실패 분석 불가 등은 모두 <strong>기록되지 않은 노력이 조직의 비효율로 되돌아오는</strong> 전형적 사례입니다.</p>
+
+  <div class="quote-card">
+    <p>기록되지 않은 노력은 결국 '나의 비효율'로 돌아옵니다. 여러분의 시간과 땀방울은 가장 소중한 자산입니다.</p>
+    <div class="attr">— 업무자산관리시스템 도입 안내자료, 피플팀</div>
+  </div>
+</section>
+
+<!-- ============ 3. 운영 방안 ============ -->
+<section id="s3" class="panel">
+  <div class="sec-head"><span class="sec-num">03</span><h2>WAMS 운영 방안</h2></div>
+  <p class="muted">아래 12개 항목은 개선회의 협의사항을 실행 가능한 단위로 재구성한 것입니다.</p>
+
+  <!-- 3.1 프로젝트 관리단위 -->
+  <h3><span class="num">3.1</span>프로젝트 관리단위 재설계 <span class="badge b-info">결재 필요</span></h3>
+  <p>현재 ERP 프로젝트는 <strong>NVT(부서 Level)</strong>로 관리되고 있으며, 세부프로젝트는 경비 지출을 위해 임의로 추가된 것에 불과합니다. WAMS는 이를 그대로 따르지 않고, 조직 특성에 맞춰 3개 트랙으로 관리단위를 분리합니다.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="k">TRACK 1 · 사업부</div>
+      <div class="t">팀별 주요사업 프로젝트</div>
+      <div class="d">사업부는 팀 단위 주요사업을 프로젝트로 등록. 고객·매출 중심 관리와 연계.</div>
+    </div>
+    <div class="card">
+      <div class="k">TRACK 2 · R&amp;D</div>
+      <div class="t">프로젝트기획관리팀 연계 관리</div>
+      <div class="d">R&amp;D 프로젝트는 프로젝트기획관리팀이 사업부 프로젝트와 연계하여 생성·변경·삭제하고, R&amp;D 투입 리소스를 매칭. 팀별 자체 프로젝트도 포함.</div>
+    </div>
+    <div class="card">
+      <div class="k">TRACK 3 · 사무직군</div>
+      <div class="t">업무코드(중분류) 기반 Task형 프로젝트</div>
+      <div class="d">경영관리그룹 등 사무직군은 기존 직무분석 업무코드의 <strong>중분류 Level</strong>을 프로젝트로 활용하여 Task 중심으로 관리.</div>
+    </div>
+  </div>
+
+  <div class="mermaid">
+flowchart TB
+  subgraph BU["사업부"]
+    BU1["팀별 주요사업 프로젝트"]
+  end
+  subgraph RD["R&amp;D 조직"]
+    RDPM["프로젝트기획관리팀"] --> RDP["R&amp;D 프로젝트 생성/변경/삭제"]
+    RDP --> RDRes["R&amp;D 투입리소스 매칭"]
+    RDTeam["팀별 자체 R&amp;D 프로젝트"] --> RDPM
+    RDPM -.연계.-> BU1
+  end
+  subgraph ADM["사무직군 (경영관리그룹 10층 등)"]
+    JobCode["직무분석 업무코드 (중분류 Level)"] --> Task["Task형 프로젝트"]
+  end
+  ERP[("ERP: NVT · 부서 Level")] -. 참조 .- BU1
+  ERP -. "경비용 세부프로젝트 (Task 아님, WAMS와 별도관리)" .- RDP
+  </div>
+
+  <div class="box warn">
+    <div class="box-title">⚠ 유의사항</div>
+    <p>ERP의 세부프로젝트는 경비 지출 목적으로 생성된 것으로 <strong>Task 단위가 아니므로 WAMS 내에서 별도로 관리</strong>합니다. WAMS 프로젝트/Task와 ERP 세부프로젝트를 동일시하지 않도록 안내가 필요합니다.</p>
+  </div>
+
+  <!-- 3.2 M/M -->
+  <h3><span class="num">3.2</span>투입시간(M/M) 입력 방식</h3>
+  <p>월간 투입 업무시간(M/M)은 별도의 타임테이블에 시간을 채워 넣는 방식이 아니라, <strong>데일리체크인 시 업무내용을 자유롭게 기입하고 투입시간만 입력</strong>하는 기존 방식을 그대로 유지합니다. 수기 입력이 가능하여 진입장벽이 낮습니다.</p>
+  <ul>
+    <li><strong>일반 프로젝트</strong> — 업무내용 자유 기입 + 투입시간 입력</li>
+    <li><strong>공통프로젝트</strong>(경영관리그룹, 통합구매자재 등) — 투입시간 입력 + <strong>귀속부서 클릭</strong>으로 공통비 배부 근거 명확화</li>
+  </ul>
+
+  <div class="mermaid">
+flowchart LR
+  A["직원 데일리체크인"] --> B["업무내용 자유기입 + 투입시간 입력"]
+  B --> C{"공통프로젝트 여부"}
+  C -- 예 --> D["귀속부서 클릭"]
+  D --> E["공통비 배부 반영"]
+  C -- 아니오 --> F["해당 프로젝트에 직접 귀속"]
+  E --> G["부서별 손익 반영 (IFRS18 대응)"]
+  F --> G
+  </div>
+
+  <!-- 3.3 계정 -->
+  <h3><span class="num">3.3</span>계정 체계 일원화 <span class="badge b-info">결재 필요</span></h3>
+  <p>겸직 발령자, 그룹사 중복 가입자 등으로 인해 한 사람이 여러 ID를 갖는 경우가 혼재되어 있습니다. 업무 이력의 정확한 귀속을 위해 <strong>이메일 1개 = 사용자 1계정</strong> 원칙으로 통합 관리합니다. 겸직자는 하나의 계정 안에서 소속 부서를 전환하여 사용하며, 그룹사 중복 가입은 대표 이메일 기준으로 정리합니다.</p>
+
+  <!-- 3.4 데일리체크인 로드맵 -->
+  <h3><span class="num">3.4</span>데일리체크인 운영 로드맵</h3>
+  <p>데일리체크인은 강제성과 편의성이 상충하는 항목입니다. 단계적 전환을 통해 습관을 정착시키고, 최종적으로는 <strong>보고 체계 자체를 WAMS로 흡수</strong>하는 방향으로 운영합니다.</p>
+
+  <div class="stepper">
+    <div class="step">
+      <div class="no">1</div>
+      <div class="t">팀장승인 디폴트</div>
+      <div class="d">사용자는 다소 불편하지만 작성률이 높음. 초기 습관 형성 단계.</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step">
+      <div class="no">2</div>
+      <div class="t">팀장승인 불필요</div>
+      <div class="d">사용자 편의는 높아지나 작성률 저하 위험 존재.</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step">
+      <div class="no">3</div>
+      <div class="t">주간업무보고 WAMS 대체</div>
+      <div class="d">주간보고를 WAMS로 대체하는 순간, 데일리체크인은 선택이 아닌 필수 구조로 자연 전환.</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step current">
+      <div class="no">4</div>
+      <div class="t">보고·지시 체계 정착</div>
+      <div class="d">팀장 · 그룹장 · 대표이사가 WAMS로 업무보고를 받고 지시하는 구조가 정착되면 근본적으로 해결.</div>
+    </div>
+  </div>
+
+  <div class="box ok">
+    <div class="box-title">✅ 제안</div>
+    <p>런칭 초기에는 <strong>1단계(팀장승인 디폴트)</strong>로 작성 습관을 형성하고, 주간·월간 자동보고 기능이 안정화되는 시점에 <strong>3단계</strong>로 전환하는 것을 제안합니다. 승인 자체를 목적으로 하기보다, "보고를 위해 자연스럽게 기록하게 되는" 흐름을 만드는 것이 핵심입니다.</p>
+  </div>
+
+  <!-- 3.5 존재 이유 -->
+  <h3><span class="num">3.5</span>"왜 WAMS인가" — 존재 이유의 재정립</h3>
+  <p>WAMS는 파일을 보관하는 두 번째 나스(NAS)가 아니라, <strong>업무의 맥락(Context)을 유지하는 중심 창고</strong>입니다. 기존에 사용하던 컨플루언스, 지라 등의 협업툴을 굳이 대체할 필요는 없습니다. <strong>해당 자료의 링크와 투입시간만 WAMS에 남기면</strong>, 담당자가 바뀌어도 "이 일이 왜, 어떻게 진행되었는지"를 즉시 추적할 수 있습니다.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>구분</th><th>기존 방식 (나스 등)</th><th>WAMS</th></tr></thead>
+      <tbody>
+        <tr><td><strong>관리 패러다임</strong></td><td>파일·폴더 중심의 물리적 저장</td><td>업무 흐름과 의사결정 근거 중심의 '맥락' 자산화</td></tr>
+        <tr><td><strong>운용상 한계</strong></td><td>자료 간 연결 고리 부재 → 정보 파편화</td><td>조직 내 모든 활동의 통합적 연결·계보 관리</td></tr>
+        <tr><td><strong>전략적 가치</strong></td><td>단순 보관(Archive)</td><td>지능형 업무를 위한 지식 베이스(Knowledge Base)</td></tr>
+        <tr><td><strong>기존 협업툴과의 관계</strong></td><td>대체 대상 아님</td><td>컨플루언스·지라 등은 그대로 사용하고, <strong>링크 + 투입시간만 WAMS에 등록</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3.6 기능 슬림화 -->
+  <h3><span class="num">3.6</span>기능 우선순위 재설계 — 뺄 건 빼고, 자동화는 더하고</h3>
+  <p>현행 WAMS 기능 중 <strong>① 데일리체크인, ② 업무현황, ③ 프로젝트 진척도</strong> 3가지를 핵심 화면으로 돋보이게 구성하고, 나머지 부가 기능은 후순위로 조정합니다. 대신 현업이 가장 부담스러워하는 <strong>주간·월간 업무보고 자동 생성 기능</strong>을 정식 오픈 시점에 함께 탑재하여, 데일리체크인 입력이 곧 보고서 작성으로 이어지도록 설계합니다.</p>
+  <div class="box gold">
+    <div class="box-title">💡 핵심 아이디어</div>
+    <p>"매일 입력하면 보고서를 따로 쓰지 않아도 된다" — 이 한 문장이 데일리체크인에 대한 심리적 저항을 상쇄하는 가장 강력한 유인입니다.</p>
+  </div>
+
+  <!-- 3.7 10층 / IFRS18 -->
+  <h3><span class="num">3.7</span>경영관리그룹(10층) 및 회계 연계</h3>
+  <p>경영관리그룹 등 사무직군은 <strong>기존 직무분석(업무코드)의 중분류 Level</strong>로 프로젝트를 생성하여 관리합니다. 회계 정산 시 <strong>귀속부서별 손익이 반영</strong>되는 구조이며, 2026년 도입되는 <strong>IFRS18 기준에 따라 향후 3개년간 기존 영업이익 구조의 손익계산서를 재작성</strong>해야 하는 상황에서, WAMS에 기록되는 귀속부서·투입시간 데이터는 <strong>공통비 배부의 회계적 근거</strong>로 직접 활용됩니다.</p>
+
+  <div class="box info">
+    <div class="box-title">📎 역할 분리 원칙</div>
+    <p>WAMS는 업무 이력·진척·투입시간을 관리하는 도구이며, <strong>회계 및 증빙 정산화 도구는 ERP · 그룹웨어 · EACC</strong>입니다. 두 시스템은 대체 관계가 아니라 <strong>투입시간 데이터를 매개로 연계되는 보완 관계</strong>임을 명확히 안내합니다.</p>
+  </div>
+
+  <!-- 3.8 직원 안내 핵심 메시지 -->
+  <h3><span class="num">3.8</span>직원 안내 핵심 메시지</h3>
+  <p>전사 공지 및 교육 시 아래 메시지를 핵심 문구로 사용할 것을 제안합니다.</p>
+
+  <div class="quote-card">
+    <p>WAMS는 누리플렉스의 업무관리 도구입니다. 업무지시, 업무이력, 업무진척도, 업무저장까지 — 흩어져 있던 우리의 노력을 하나로 모아 지키는 종합 플랫폼입니다.</p>
+    <div class="attr">— WAMS 전사 안내 핵심 문구(안)</div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>안내 포인트</th><th>핵심 메시지</th></tr></thead>
+      <tbody>
+        <tr><td><strong>WAMS란</strong></td><td>업무지시 · 업무이력 · 업무진척도 · 업무저장을 아우르는 누리플렉스의 종합 업무관리 플랫폼</td></tr>
+        <tr><td><strong>우리는 이렇게 한다</strong></td><td>매일 하던 일을 있는 그대로 남긴다 · 기존 툴(컨플루언스, 지라 등)은 링크만 연결한다 · 공통업무는 귀속부서를 반드시 표기한다</td></tr>
+        <tr><td><strong>WAMS가 아닌 것</strong></td><td>회계·증빙 정산 도구가 아님 — 그 역할은 <strong>ERP · 그룹웨어 · EACC</strong>가 담당</td></tr>
+        <tr><td><strong>왜 해야 하는가</strong></td><td>기록되지 않은 노력은 평가에 반영될 수 없다 — 객관적 데이터가 곧 공정한 보상의 근거가 된다</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3.9 조직 구조 -->
+  <h3><span class="num">3.9</span>조직별 관리 구조</h3>
+  <p>R&amp;D, 사업부, 경영관리그룹(10층)은 각각의 업무 특성에 맞는 프로젝트/Task 구조를 갖되, <strong>고객관리 관점</strong>에서는 공통된 흐름으로 연결됩니다.</p>
+
+  <div class="mermaid">
+flowchart LR
+  RD["R&amp;D 조직 <br/> 프로젝트기획관리팀 연계"] --> CUST["고객관리 관점 <br/> (내부고객 · 외부고객)"]
+  BU2["사업부 <br/> 팀별 주요사업"] --> CUST
+  ADM2["경영관리그룹(10층) <br/> Task형 업무"] --> CUST
+  SALES2["영업조직 <br/> 고객관리 중심"] --> CUST
+  CUST --> WAMS2[["WAMS 통합 관리"]]
+  </div>
+
+  <!-- 3.11 영업 -->
+  <h3><span class="num">3.10</span>영업조직 특이사항</h3>
+  <p>영업직군은 프로젝트 단위보다 <strong>고객관리</strong> 중심으로 업무가 진행되는 특성을 고려하여, 초기에는 고객관리 관점의 기록에 집중합니다. 이후 영업 활동이 정형화되는 단계에서 <strong>고객관리 항목을 Task로 흡수</strong>하여 다른 조직과 동일한 방식으로 통합 관리합니다.</p>
+
+  <!-- 3.12 지속개선 -->
+  <h3><span class="num">3.11</span>지속 개선 원칙</h3>
+  <p>정식 오픈 이후에도 불편사항은 계속 개선해 나가는 것을 원칙으로 합니다. 다만 초기 안착을 위해 <strong>업무 등록, 파편화된 업무 자료 저장, 주간·월간 보고</strong> 3가지 활용을 최우선 과제로 설정하고, 그 외 기능은 사용 데이터와 현업 피드백을 근거로 순차 확장합니다.</p>
+</section>
+
+<!-- ============ 4. 전사 구조도 ============ -->
+<section id="s4" class="panel">
+  <div class="sec-head"><span class="sec-num">04</span><h2>전체 WAMS 맥락 · 구조 다이어그램</h2></div>
+  <p>지금까지 제시한 운영 방안을 하나의 그림으로 정리하면 다음과 같습니다. WAMS는 조직 전체의 업무 데이터가 모이는 <strong>중심 허브</strong>이며, 회계·증빙은 ERP/그룹웨어/EACC가, 협업 산출물은 컨플루언스/지라 등 기존 툴이 각자의 역할을 유지한 채 <strong>링크와 투입시간이라는 최소 단위로 WAMS와 연결</strong>됩니다.</p>
+
+  <div class="mermaid">
+flowchart TB
+  CEO["한정훈 대표이사 (총괄)"] --> People["피플팀 홍광준 팀장 (서비스기획)"]
+  CEO --> Strategy["전략개발팀 김대환 팀장 (시스템개발)"]
+  People --> WAMS[["WAMS 업무자산관리시스템"]]
+  Strategy --> WAMS
+
+  WAMS --> DailyCheckin["데일리체크인 <br/> (업무내용 + 투입시간)"]
+  WAMS --> Status["업무현황"]
+  WAMS --> Progress["프로젝트 진척도"]
+  WAMS --> Report["주간/월간 업무보고 자동생성"]
+
+  BU3["사업부 <br/> 팀별 주요사업 프로젝트"] --> WAMS
+  RDorg["R&amp;D 조직 <br/> 프로젝트기획관리팀 연계"] --> WAMS
+  ADM3["경영관리그룹(10층) <br/> 업무코드 기반 Task"] --> WAMS
+  SALES3["영업조직 <br/> 고객관리"] --> WAMS
+
+  WAMS -. "링크 + 투입시간만 등록" .-> EXT[("컨플루언스 · 지라 등 기존 협업툴")]
+  WAMS -. "귀속부서 + 투입시간 (공통비 배부 근거)" .-> ACC[("ERP · 그룹웨어 · EACC — 회계/증빙 정산")]
+  ACC --> PL2["부서별 손익 / IFRS18 대응 재무제표"]
+
+  WAMS --> Asset["퇴사자 발생 시에도 <br/> 별도 인수인계 불필요한 업무자산"]
+  </div>
+
+  <p class="muted">※ 실선은 WAMS 내부 관리 대상, 점선은 외부 시스템과의 최소 연계(링크·투입시간)를 의미합니다.</p>
+</section>
+
+<!-- ============ 5. 향후 일정 ============ -->
+<section id="s5" class="panel">
+  <div class="sec-head"><span class="sec-num">05</span><h2>향후 일정</h2></div>
+  <p>주간·월간 업무보고 자동 기능 개발을 완료하는 시점에 맞추어 <strong>WAMS 전사 정식 오픈을 동시에 실시</strong>하는 것을 제안합니다. 보고 기능 없이 데일리체크인만 먼저 오픈할 경우 초기 저항이 재현될 우려가 있기 때문입니다.</p>
+
+  <div class="mermaid">
+gantt
+    title WAMS 정식 오픈 로드맵
+    dateFormat  YYYY-MM-DD
+    section 결재/공감대
+    경영진 결재                       :done, a1, 2026-07-06, 5d
+    전사 커뮤니케이션(핵심메시지 배포) :a2, after a1, 10d
+    section 기능 보강
+    프로젝트 관리단위 재설계 반영      :b1, after a1, 14d
+    계정 일원화 작업                  :b2, after a1, 10d
+    주간/월간 업무보고 자동생성 개발   :b3, after a1, 21d
+    section 오픈
+    통합 테스트                       :c1, after b3, 7d
+    전사 정식 오픈                    :milestone, after c1, 0d
+    안착 모니터링 및 개선              :d1, after c1, 30d
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>단계</th><th>주요 내용</th><th>담당</th></tr></thead>
+      <tbody>
+        <tr><td><strong>결재/공감대</strong></td><td>본 보고서 결재, 핵심 메시지 전사 배포</td><td><span class="who">피플팀</span></td></tr>
+        <tr><td><strong>기능 보강</strong></td><td>프로젝트 관리단위 재설계, 계정 통합, 주간·월간 자동보고 개발</td><td><span class="who">전략개발팀</span></td></tr>
+        <tr><td><strong>오픈</strong></td><td>통합 테스트 후 데일리체크인 + 자동보고 동시 오픈</td><td><span class="who">피플팀</span> <span class="who">전략개발팀</span></td></tr>
+        <tr><td><strong>안착</strong></td><td>작성률 모니터링, 현업 피드백 기반 지속 개선</td><td><span class="who">피플팀</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 6. 기대효과 ============ -->
+<section id="s6" class="panel">
+  <div class="sec-head"><span class="sec-num">06</span><h2>기대효과 — 선순환 구조의 완성</h2></div>
+  <p>WAMS의 궁극적 지향점은 감시가 아니라 <strong>정당한 보상</strong>입니다. 객관적으로 누적된 데이터는 책임자의 주관적 평가를 배제하고, 여러분의 노력 하나하나를 공정하게 인정하는 근거가 됩니다.</p>
+
+  <div class="mermaid">
+flowchart LR
+  A["목표 설정 <br/> 명확한 목표·우선순위"] --> B["업무 지원(분배) <br/> 불필요한 혼선 방지"]
+  B --> C["업무 진행 <br/> 진척상황 기록·누적"]
+  C --> D["정기 피드백 <br/> 조기 교정, 자원낭비 방지"]
+  D --> E["성과 측정 <br/> 객관적 데이터 기반 공정 평가"]
+  E --> F["공정한 보상 <br/> 인센티브·연봉 반영"]
+  F -. 동기부여 .-> A
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="k">EFFECT 1</div>
+      <div class="t">업무 연속성 확보</div>
+      <div class="d">퇴사·전환배치 발생 시에도 별도 인수인계 절차 없이 업무 이력 즉시 확인</div>
+    </div>
+    <div class="card">
+      <div class="k">EFFECT 2</div>
+      <div class="t">공정한 성과 평가</div>
+      <div class="d">이분법적 결과 평가에서 벗어나, 과정의 노력까지 데이터로 반영</div>
+    </div>
+    <div class="card">
+      <div class="k">EFFECT 3</div>
+      <div class="t">회계 정합성 강화</div>
+      <div class="d">귀속부서·투입시간 데이터로 공통비 배부 및 IFRS18 대응 손익 구조 뒷받침</div>
+    </div>
+    <div class="card">
+      <div class="k">EFFECT 4</div>
+      <div class="t">보상으로의 환류</div>
+      <div class="d">업무효율성 증대 → 매출 증진 → 개인 인센티브·연봉으로 연결되는 상생 구조</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. 결재 요청 ============ -->
+<section id="s7" class="panel">
+  <div class="sec-head"><span class="sec-num">07</span><h2>협조 및 결재 요청 사항</h2></div>
+  <p>본 운영 방안의 전사 실행을 위해 다음 4가지 사항에 대한 경영진의 검토와 승인을 요청드립니다.</p>
+
+  <ol>
+    <li><strong>프로젝트 관리단위 재설계 승인</strong> — 사업부(팀별 주요사업) · R&amp;D(프로젝트기획관리팀 연계) · 사무직군(업무코드 중분류 기반 Task) 3-Track 구조</li>
+    <li><strong>계정 일원화 정책 승인</strong> — 겸직·그룹사 중복 계정을 이메일 1개 기준으로 통합</li>
+    <li><strong>데일리체크인 단계적 전환 계획 승인</strong> — 팀장승인 디폴트로 시작하여 주간보고 대체 시점에 상시 체계로 전환</li>
+    <li><strong>주간·월간 자동보고 기능 조기 개발 및 정식 오픈 일정 승인</strong> — 보고 기능과 데일리체크인의 동시 오픈</li>
+  </ol>
+
+  <div class="box danger">
+    <div class="box-title">🔒 회계 및 증빙 관련 확인</div>
+    <p>WAMS는 회계·증빙 정산 시스템을 대체하지 않습니다. 해당 업무는 계속 <strong>ERP · 그룹웨어 · EACC</strong>를 통해 처리되며, WAMS는 귀속부서·투입시간 데이터를 통해 이를 보완하는 역할에 한정됩니다. 이 원칙이 전사 커뮤니케이션에서 일관되게 유지되어야 현업의 오해를 방지할 수 있습니다.</p>
+  </div>
+
+  <p style="margin-top:2rem;">이상과 같이 WAMS 도입 현황 및 운영 방안을 보고드리며, 상기 결재 요청 사항에 대한 대표이사님의 검토를 요청드립니다.</p>
+</section>
+
+</div>
+
+<footer>
+  WAMS 도입 현황 및 운영 방안 보고서 · 피플팀 · 전략개발팀 공동작성 · 2026. 07. 06. · CONFIDENTIAL
+</footer>
+
+<script>
+mermaid.initialize({
+  startOnLoad:true,
+  theme:'base',
+  themeVariables:{
+    primaryColor:'#eaf1ff',
+    primaryTextColor:'#122548',
+    primaryBorderColor:'#2f6fed',
+    lineColor:'#5b6b82',
+    secondaryColor:'#fdf3dc',
+    tertiaryColor:'#fff',
+    fontFamily:'Noto Sans KR, sans-serif'
+  },
+  securityLevel:'loose',
+  flowchart:{useMaxWidth:true, htmlLabels:true, curve:'basis'},
+  gantt:{useMaxWidth:true},
+  timeline:{useMaxWidth:true}
+});
+
+// active nav highlight
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(sec => {
+    const top = sec.getBoundingClientRect().top;
+    if (top - 90 <= 0) current = sec.getAttribute('id');
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+navLinks.forEach(a=>{
+  a.addEventListener('click', e=>{
+    e.preventDefault();
+    const el = document.querySelector(a.getAttribute('href'));
+    if(el){ window.scrollTo({top: el.offsetTop - 70, behavior:'smooth'}); }
+  });
+});
+</script>
+</body>
+</html>
